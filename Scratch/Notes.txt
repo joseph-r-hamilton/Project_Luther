@@ -1,0 +1,65 @@
+Wed Jan 24 06:52:32 CST 2018
+
+Starting work on project Luther.
+
+I need a project proposal... actually I need two.
+
+Project Luther
+============================================================
+Proposal 1:
+Analyze neighborhood stability vs. home property tax assessments.
+Scrape property tax values and length of time since last sale.
+============================================================
+Proposal 2:
+Analyze past Winter Olympic athletic performance data, incorporating
+as many features as available relative to race times, etc.
+============================================================
+
+
+Wed Jan 24 22:17:18 CST 2018
+
+The instructors seemed to jive with Proposal 1 as long as I can make something of it.
+
+But David also concurred that if I wish to shift to using CI and python files over
+Jupyter Notebooks, I should indeed start earlier (as in with Project 2) rather than
+later.
+
+Thing is, there probably a lot of things I need to start to incorporate.
+
+The list just keeps growing and growing honestly.
+
+If I don't install/add/use these as the list keeps growing, I may never.
+
+By end-of-day Friday I must have data scraped to show.  The instructors don't care about how
+so much.  And the regression can wait till Monday for the MVP.  So I don't have to have done
+anything other than a couple Jupyter notebooks.  In this vein, I need to interleave things.
+I cannot wait till Friday morning to try to scrape.  But I need to consider or plan how to
+do CI all along, etc.
+
+
+
+Quick note here how to integrate Mongo and Pandas:
+https://stackoverflow.com/questions/16249736/how-to-import-data-from-mongodb-to-pandas
+
+Link on integating python CircleCI and something new to me:
+https://scotch.io/tutorials/continuous-integration-with-python-and-circle-ci
+
+I'll work on that soon.  But I must switch to exploring how to scrape...
+
+Thu Jan 25 22:47:40 CST 2018
+
+The first spider...
+
+The plan...
+
+Use a middleware to fire up Selenium.
+Somehow pass through parameters to the middleware to fill in the form.
+In the middleware iterate through the rows to:
+	grab links
+	grab tables from the address popups
+Then the middleware creates a response to push to Scrapy.
+
+No... it looks like I'd be better off keeping the webdriver in Spider and use
+it to generate the requests for Scrapy to handle.
+
+
