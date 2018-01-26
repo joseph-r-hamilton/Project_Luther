@@ -24,6 +24,9 @@ class WillCoSpider(scrapy.Spider):
         self.driver = webdriver.Chrome(self.chromedriver)
         self.driver.get(self.site_url)
 
+        # TODO: Remove this later since it should be unnecessary later
+        self.headers_printed = False
+
         for index,row in self.queries.iterrows():
             # Execute a search
             self.doSearch(row)
@@ -79,7 +82,17 @@ class WillCoSpider(scrapy.Spider):
 
         return(pins)
 
+    fields_of_interest = [
+        'PIN', 'PropClass', 'Address', 'City', 'Zip', 'SaleDate', 'SaleAmt',
+        'TaxRate', 'ASL', 'ASFL', 'AI', 'ASB', 'ASFB', 'ASTotal', 'ASFTotal',
+        'Subdivision', 'FullBath', 'Style', 'HalfBath', 'LivingSqFt', 'CentralAir',
+        'BldgSqFt', 'Fireplace', 'YearBuilt', 'Porch', 'Basement', 'Attic',
+        'Garage', 'Lot', 'Block', 'Unit', 'Building', 'Area', 'LegalDesc', 'Status'
+    ]
 
+    fields_of_interest = [
+        'PIN', 'PropClass', 'SaleDate', 'SaleAmt', 'TaxRate'
+    ]
 
 
     def parse(self, response):
@@ -89,7 +102,18 @@ class WillCoSpider(scrapy.Spider):
 
         # TODO - pass this to an item and a proper pipeline
         data = []
+        if not self.headers_printed:
+            print (','.join(self.fields_of_interest))
+            self.headers_printed = True
 
+        for field in self.fields_of_interest:
+            # TODO - wrap this in a try or something to output N/A, not err
+            data.append(
+                x.xpath(
+                '//*[@id="ctl00_BC_lb%s"]//text()' % field
+                ).extract()[0]
+            )
+        '''
         # PIN
         data.append(
             x.xpath('//*[@id="ctl00_BC_lbPIN"]//text()').extract()[0]
@@ -109,7 +133,9 @@ class WillCoSpider(scrapy.Spider):
         data.append(
             x.xpath('//*[@id="ctl00_BC_lbTaxRate"]//text()').extract()[0]
         )
+        '''
 
         # TODO - get rid of this ugliness of dumping right here
+        # Create a proper pipeline for serialization
         print(','.join(data))
         pass
