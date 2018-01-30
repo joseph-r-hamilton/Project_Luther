@@ -35,6 +35,7 @@ class WillCoSpider(scrapy.Spider):
             # Process the results
             while True:
                 pins = self.doResults()
+                pins.append('1104184120610000')
                 for pin in pins:
                     #print('OUTPUT %s' % self.pin2address(pin))
                     #print('TYPE %s' % type(self.pin2address(pin)))
@@ -50,6 +51,9 @@ class WillCoSpider(scrapy.Spider):
                 # More?
                 next = None
                 try:
+class WillCo2Spider(WillCoSpider):
+    name = 'WillCo2'
+
                     next = self.driver.find_element_by_xpath('//*[@id="ctl00_BC_gvParcels_ctl34_lbNext"]')
                 except:
                     pass
@@ -57,7 +61,7 @@ class WillCoSpider(scrapy.Spider):
                     next.click()
                 else:
                     break
-        #yield []
+        return []
     
     '''
     The thing to do here seems to be to pass in to AJAX a callback.  I need to have that callback set a
@@ -70,7 +74,11 @@ class WillCoSpider(scrapy.Spider):
             pin = "''' + pin + '''";
             p2a_data = undefined;
             $.ajax({
-                type: "GET",
+                type: "GET",        self.queries = pd.read_csv('w2.csv')
+        self.queries.fillna('',inplace=True)
+        #yield scrapy.Request('%s/%s' % (site_url,'prop_card.aspx?pin=1202192050330000'))
+
+
                 async: false,
                 contentType: "application/json; charset=utf-8;",
                 url: "/WebServices/Utils.asmx/GetAddresses",
@@ -115,10 +123,17 @@ class WillCoSpider(scrapy.Spider):
         pds = []
         for a  in self.driver.find_elements_by_xpath('//*[@id="ctl00_BC_gvParcels"]/tbody/tr/td[2]/a'):
             a.click()
-            time.sleep(0.25)
+            time.sleep(0.25)        self.queries = pd.read_csv('w2.csv')
+        self.queries.fillna('',inplace=True)
+        #yield scrapy.Request('%s/%s' % (site_url,'prop_card.aspx?pin=1202192050330000'))
+
+
             pds.append(pd.read_html(
                 self.driver.find_elements_by_xpath('//*[@id="address-list"]')[0].get_attribute("outerHTML")
             )[0].head(1))
+class WillCo2Spider(WillCoSpider):
+    name = 'WillCo2'
+
             location = self.driver.find_element_by_xpath('/html/body/div[2]/div[1]/button/span[1]')
             location.click()
 
@@ -136,7 +151,11 @@ class WillCoSpider(scrapy.Spider):
     # Fields available but being ignored:
     # LegalDesc
 
-    #fields_of_interest = [
+    #fields_of_interest = [        self.queries = pd.read_csv('w2.csv')
+        self.queries.fillna('',inplace=True)
+        #yield scrapy.Request('%s/%s' % (site_url,'prop_card.aspx?pin=1202192050330000'))
+
+
     #    'PIN', 'PropClass', 'SaleDate', 'SaleAmt', 'TaxRate'
     #]
 
@@ -163,7 +182,14 @@ class WillCoSpider(scrapy.Spider):
         # PIN
         pin = data[0].replace('-','')
         # Address Data
-        data[2] = self.addresses[pin]['address']
+        data[2] = self.addresses[pin]['addr        self.queries = pd.read_csv('w2.csv')
+        self.queries.fillna('',inplace=True)
+        #yield scrapy.Request('%s/%s' % (site_url,'prop_card.aspx?pin=1202192050330000'))
+
+
+class WillCo2Spider(WillCoSpider):
+    name = 'WillCo2'
+ess']
         data[3] = self.addresses[pin]['city']
         data[4] = self.addresses[pin]['zip']
 
@@ -231,4 +257,4 @@ class WillCo2Spider(WillCoSpider):
                         pin = "%s%s%d%02d0000" % (township,section,block,lot)
                         print(pin)
                         
-        yield []
+        return []
