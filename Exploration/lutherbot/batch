@@ -1,0 +1,16 @@
+# 14 concurrent
+scrapy crawl -a tstart=0 -a tend=2 WillCo2 > out1 2> err1 &
+scrapy crawl -a tstart=2 -a tend=4 WillCo2 > out2 2> err2 &
+scrapy crawl -a tstart=4 -a tend=6 WillCo2 > out3 2> err3 &
+scrapy crawl -a tstart=6 -a tend=8 WillCo2 > out4 2> err4 &
+scrapy crawl -a tstart=8 -a tend=10 WillCo2 > out5 2> err5 &
+scrapy crawl -a tstart=10 -a tend=12 WillCo2 > out6 2> err6 &
+scrapy crawl -a tstart=12 -a tend=14 WillCo2 > out7 2> err7 &
+scrapy crawl -a tstart=14 -a tend=16 WillCo2 > out8 2> err8 &
+scrapy crawl -a tstart=16 -a tend=18 WillCo2 > out9 2> err9 &
+scrapy crawl -a tstart=18 -a tend=20 WillCo2 > out10 2> err10 &
+scrapy crawl -a tstart=20 -a tend=22 WillCo2 > out11 2> err11 &
+scrapy crawl -a tstart=22 -a tend=24 WillCo2 > out12 2> err12 &
+scrapy crawl -a tstart=24 -a tend=26 WillCo2 > out13 2> err13 &
+scrapy crawl -a tstart=26 -a tend=28 WillCo2 > out14 2> err14 &
+

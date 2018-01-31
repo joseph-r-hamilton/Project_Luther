@@ -2,11 +2,16 @@
 import scrapy
 from scrapy.http import HtmlResponse
 
+from ..items import WillCoItem
+
 from selenium import webdriver
 from selenium.webdriver.support import ui
 import os
 import time
 import pandas as pd
+
+import pymongo
+import pdb
 
 class WillCoSpider(scrapy.Spider):
     name = 'WillCo'
@@ -20,8 +25,10 @@ class WillCoSpider(scrapy.Spider):
         self.queries = pd.read_csv('w2.csv')
         self.queries.fillna('',inplace=True)
         #yield scrapy.Request('%s/%s' % (site_url,'prop_card.aspx?pin=1202192050330000'))
-
-        self.driver = webdriver.Chrome(self.chromedriver)
+    
+        options = webdriver.ChromeOptions()
+        options.add_argument('headless')
+        self.driver = webdriver.Chrome(self.chromedriver, chrome_options=options)
 
         # TODO: Remove this later since it should be unnecessary later
         self.headers_printed = False
@@ -174,61 +181,117 @@ class WillCoSpider(scrapy.Spider):
         pass
 
 '''
-    WillCo2 - changing the front-end up a bit...
+    WillCo2 - changing things up a bit...
 '''
 class WillCo2Spider(WillCoSpider):
     name = 'WillCo2'
 
     def start_requests(self):
-        self.driver = webdriver.Chrome(self.chromedriver)
+    
+        options = webdriver.ChromeOptions()
+        options.add_argument('headless')
+        self.driver = webdriver.Chrome(self.chromedriver, chrome_options=options)
+        
+        self.mongo_uri = self.settings['MONGO_URI']
+        self.mongo_db = self.settings['MONGO_DATABASE']
+        self.client = pymongo.MongoClient(self.mongo_uri)
+        self.db = self.client[self.mongo_db]
+
+        self.collection_name = 'PropertyInfo'
 
         # TODO: Remove this later since it should be unnecessary later
         self.headers_printed = False
         
         self.addresses = {}
         self.driver.get(self.site_url)
-        self.doSearch(['1','','a'])
+        self.doSearch({'from':'1','to':'','street':'a'})
         
         townships = [
-            '0701',        #Wheatland
-            '1202',        #Dupage
-            '0603',        #Plainfield
-            '1104',        #Lockport
-            '1605',        #Homer
-            '0506',        #Troy
-            '3007',        #Joliet
-            '1508',        #New Lenox
-            '1909',        #Frankfort
-            '0410',        #Channahon
-            '1011',        #Jackson
-            '1412',        #Manhattan
-            '1813',        #Green Garden
-            '2114',        #Monee
-            '2315',        #Crete
-            '2316',        #Crete
-            '0317',        #Wilmington
-            '0918',        #Florence
-            '1319',        #Wilton
-            '1720',        #Peotone
-            '2021',        #Will
-            '2222',        #Washington
-            '2223',        #Washington
-            '0224',        #Reed
-            '0124',        #Custer
-            '0125',        #Custer
-            '0824',        #Wesley
-            '0825',        #Wesley
+            '01-24',        #Custer
+            '01-25',        #Custer
+            '02-24',        #Reed
+            '03-17',        #Wilmington
+            '04-10',        #Channahon
+            '05-06',        #Troy
+            '06-03',        #Plainfield
+            '07-01',        #Wheatland
+            '08-24',        #Wesley
+            '08-25',        #Wesley
+            '09-18',        #Florence
+            '10-11',        #Jackson
+            '11-04',        #Lockport
+            '12-02',        #Dupage
+            '13-19',        #Wilton
+            '14-12',        #Manhattan
+            '15-08',        #New Lenox
+            '16-05',        #Homer
+            '17-20',        #Peotone
+            '18-13',        #Green Garden
+            '19-09',        #Frankfort
+            '20-21',        #Will
+            '21-14',        #Monee
+            '22-22',        #Washington
+            '22-23',        #Washington
+            '23-15',        #Crete
+            '231-6',        #Crete
+            '30-07',        #Joliet
         ]
         sections = ["%02d" % (1+x) for x in range(36)]
-        for township in townships[:1]:
-            for section in sections[:1]:
+        
+        #for township in townships
+        for township in townships[int(self.tstart):int(self.tend)]:
+            for section in sections:
                 for block in range(100,1000):
-                    if block > 101:
-                        break
+                    #if block > 101:
+                    #    break
+                    lotmiss = 0
+                    lotfound = 0
                     for lot in range(1,1000):
-                        if lot > 2:
+                        # Five sequential misses?  Either done or empty.  Move on...
+                        if lotmiss > 5:
                             break
-                        pin = "%s%s%d%02d0000" % (township,section,block,lot)
-                        print(pin)
-                        
-        yield []
+                        pin = "%s-%s-%d-%03d-0000" % (township,section,block,lot)
+                        #print(pin)
+                        # Check database to see if we've already got this one
+                        record = self.db[self.collection_name].find_one({'PIN': pin})
+                        # If no record found, move on...
+                        if record:
+                            continue
+                        pin = pin.replace('-','')
+                        p2a = self.pin2address(pin)
+                        if (not p2a):
+                            lotmiss += 1
+                            continue
+                        lotfound += 1
+                        lotmiss = 0
+                        #print(p2a)
+                        self.addresses[pin]=p2a[0]
+                        yield scrapy.Request(
+                            'http://www.willcountysoa.com/prop_card.aspx?pin=%s' % pin
+                        )
+                        #print(self.addresses)
+
+        #yield []
+
+    def parse(self, response):
+        ''' Digest a page '''
+        #print(response.body)
+        x = scrapy.Selector(response)
+
+        record = {}
+        for field in self.fields_of_interest:
+            location = x.xpath(
+                '//*[@id="ctl00_BC_lb%s"]//text()' % field
+            )
+            texts = location.extract()
+            record[field] = texts[0] if len(texts) else 'N/A'
+
+        # PIN
+        pin = record['PIN'].replace('-','')
+        # Address Data
+
+        record['Address'] = self.addresses[pin]['address']
+        record['City'] = self.addresses[pin]['city']
+        record['Zip'] = self.addresses[pin]['zip']
+
+        yield(WillCoItem(record))

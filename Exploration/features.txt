@@ -1,0 +1,36 @@
+
+
+PIN            Key, could derive for neighborhood
+PropClass      OUGHT to filter on RESIDENTIAL
+Address        n/a
+City           n/a... hmm...
+Zip            n/a
+SaleDate       TARGET!!! (well, target is derived from this)
+SaleAmt        done
+TaxRate        done
+ASL            
+ASFL           
+AI             
+ASB            
+ASFB           
+ASTotal        done
+ASFTotal       done
+Subdivision    n/a
+FullBath       done?
+Style          CATEGORICAL...
+HalfBath       done?
+LivingSqFt     done
+CentralAir     done
+BldgSqFt       done
+Fireplace      done
+YearBuilt      done
+Porch          done
+Basement       difficult to handle.
+Attic          unworkable (just "NO" or "NA")
+Garage         difficult to handle
+Lot            n/a
+Block          n/a
+Unit           n/a
+Building       n/a
+Area           n/a
+Status         n/a
