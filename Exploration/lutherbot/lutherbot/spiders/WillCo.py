@@ -236,7 +236,8 @@ class WillCo2Spider(WillCoSpider):
             '231-6',        #Crete
             '30-07',        #Joliet
         ]
-        sections = ["%02d" % (1+x) for x in range(36)]
+        #sections = ["%02d" % (1+x) for x in range(36)]
+        sections = ["%02d" % x for x in range(36,0,-1)]
         
         #for township in townships
         for township in townships[int(self.tstart):int(self.tend)]:
